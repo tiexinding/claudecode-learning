@@ -6,6 +6,8 @@ from ai_generator import AIGenerator
 from session_manager import SessionManager
 from search_tools import ToolManager, CourseSearchTool
 from models import Course, Lesson, CourseChunk
+from llm_providers.factory import LLMProviderFactory
+from config import get_llm_config, validate_llm_config
 
 class RAGSystem:
     """Main orchestrator for the Retrieval-Augmented Generation system"""
@@ -13,10 +15,27 @@ class RAGSystem:
     def __init__(self, config):
         self.config = config
         
+        # Validate LLM configuration
+        validate_llm_config()
+        
+        # Get LLM configuration
+        llm_config = get_llm_config()
+        
         # Initialize core components
         self.document_processor = DocumentProcessor(config.CHUNK_SIZE, config.CHUNK_OVERLAP)
         self.vector_store = VectorStore(config.CHROMA_PATH, config.EMBEDDING_MODEL, config.MAX_RESULTS)
-        self.ai_generator = AIGenerator(config.ANTHROPIC_API_KEY, config.ANTHROPIC_MODEL)
+        
+        # Create LLM provider based on configuration
+        self.llm_provider = LLMProviderFactory.create_provider(
+            llm_config["provider"],
+            llm_config["api_key"],
+            llm_config["model"]
+        )
+        
+        # Create AI generator with the provider (for backward compatibility)
+        self.ai_generator = AIGenerator(llm_config["api_key"], llm_config["model"])
+        self.ai_generator.provider = self.llm_provider  # Add provider to existing generator
+        
         self.session_manager = SessionManager(config.MAX_HISTORY)
         
         # Initialize search tools
