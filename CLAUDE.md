@@ -25,10 +25,10 @@ uv remove <package>
 ```bash
 ./run.sh
 # or manually:
-cd backend && uv run uvicorn app:app --reload --port 8000
+cd backend && uv run uvicorn app:app --reload --port 8001
 ```
 
-The app serves at `http://localhost:8000` (UI) and `http://localhost:8000/docs` (API docs).
+The app serves at `http://localhost:8001` (UI) and `http://localhost:8001/docs` (API docs).
 
 **Environment setup:** Create a `.env` file in the project root with `ANTHROPIC_API_KEY=<key>`. This is loaded by `backend/config.py` via `python-dotenv`.
 
